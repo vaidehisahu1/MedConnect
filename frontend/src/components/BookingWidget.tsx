@@ -4,9 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../lib/api";
 
+interface Slot {
+    date: string;
+    time: string;
+    available?: boolean;
+    _id?: string;
+}
+
 interface BookingWidgetProps {
     doctorId: string;
-    slots: string[];
+    slots: Slot[] | string[];
     consultationFee: number;
 }
 
@@ -148,24 +155,50 @@ export default function BookingWidget({
                     Select Time Slot *
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                    {slots.length > 0 ? (
-                        slots.map((slot) => (
-                            <button
-                                key={slot}
-                                onClick={() => setSelectedTime(slot)}
-                                className={`py-2 px-1 text-xs sm:text-sm border rounded-xl font-medium transition ${selectedTime === slot
-                                        ? "bg-primary text-white border-primary shadow-sm"
-                                        : "bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary"
-                                    }`}
-                            >
-                                {slot}
-                            </button>
-                        ))
-                    ) : (
-                        <div className="col-span-3 text-sm text-slate-400 italic text-center py-2">
-                            No slots available for this doctor.
-                        </div>
-                    )}
+                    {(() => {
+                        // Handle both old format (string[]) and new format (Slot[])
+                        let availableSlots: string[] = [];
+                        
+                        if (slots.length > 0) {
+                            if (typeof slots[0] === 'string') {
+                                // Old format: string array
+                                availableSlots = slots as string[];
+                            } else {
+                                // New format: Slot objects - filter by selected date
+                                const slotObjects = slots as Slot[];
+                                if (selectedDate) {
+                                    const formattedDate = selectedDate.toISOString().split("T")[0];
+                                    availableSlots = slotObjects
+                                        .filter(slot => slot.date === formattedDate && slot.available !== false)
+                                        .map(slot => slot.time)
+                                        .sort(); // Sort times
+                                } else {
+                                    // If no date selected, show all unique times
+                                    const uniqueTimes = [...new Set(slotObjects.map(s => s.time))];
+                                    availableSlots = uniqueTimes.sort();
+                                }
+                            }
+                        }
+
+                        return availableSlots.length > 0 ? (
+                            availableSlots.map((time) => (
+                                <button
+                                    key={time}
+                                    onClick={() => setSelectedTime(time)}
+                                    className={`py-2 px-1 text-xs sm:text-sm border rounded-xl font-medium transition ${selectedTime === time
+                                            ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                                            : "bg-white text-slate-600 border-slate-200 hover:border-teal-500 hover:text-teal-600"
+                                        }`}
+                                >
+                                    {time}
+                                </button>
+                            ))
+                        ) : (
+                            <div className="col-span-3 text-sm text-slate-400 italic text-center py-2">
+                                {selectedDate ? "No slots available for this date." : "Please select a date first."}
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
 

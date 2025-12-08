@@ -36,7 +36,7 @@ export default function Hero() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Link
                         href="/doctors"
-                        className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-bold rounded-xl text-lg hover:bg-teal-600 transition shadow-lg shadow-teal-200 hover:shadow-xl hover:-translate-y-1"
+                        className="w-full sm:w-auto px-8 py-4 bg-teal-600 text-white font-bold rounded-xl text-lg hover:bg-teal-700 transition-all shadow-xl shadow-teal-200 hover:shadow-2xl hover:shadow-teal-300 hover:-translate-y-1 duration-200"
                     >
                         Find a Doctor
                         <svg
@@ -56,7 +56,7 @@ export default function Hero() {
 
                     <Link
                         href="/doctors"
-                        className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-xl text-lg border-2 border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition"
+                        className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-xl text-lg border-2 border-slate-300 hover:border-slate-400 hover:bg-slate-50 transition-all shadow-md shadow-slate-200 hover:shadow-lg duration-200"
                     >
                         View All Specialties
                     </Link>

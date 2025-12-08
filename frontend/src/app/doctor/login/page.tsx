@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "../../lib/api";
+import api from "../../../lib/api";
 
-export default function Login() {
+export default function DoctorLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,18 +18,18 @@ export default function Login() {
     setError("");
 
     try {
-      const { data } = await api.post("/users/login", { email, password });
+      const { data } = await api.post("/doctors/login", { email, password });
 
-      // Check if user is a doctor - redirect to doctor login
-      if (data.role === "doctor") {
-        setError("Please use the doctor login page");
+      // Verify it's a doctor account
+      if (data.role !== "doctor") {
+        setError("Access denied. Doctor account required.");
         setLoading(false);
         return;
       }
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
-      router.push("/");
+      router.push("/doctor/home");
     } catch (err: any) {
       setError(
         err.response?.data?.message || "Login failed. Please check your credentials."
@@ -54,15 +54,15 @@ export default function Login() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
           </div>
           <h2 className="text-3xl font-extrabold text-slate-900">
-            Welcome Back
+            Doctor Login
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Sign in to manage your appointments and health.
+            Sign in to manage your slots and profile.
           </p>
         </div>
 
@@ -111,8 +111,9 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-3.5 px-4 border-2 border-transparent text-sm font-bold rounded-xl text-white ${loading ? "bg-teal-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
-                } focus:outline-none focus:ring-4 focus:ring-teal-300 shadow-xl shadow-teal-200 hover:shadow-2xl hover:shadow-teal-300 transition-all duration-200 transform hover:-translate-y-0.5`}
+              className={`group relative w-full flex justify-center py-3.5 px-4 border-2 border-transparent text-sm font-bold rounded-xl text-white ${
+                loading ? "bg-teal-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
+              } focus:outline-none focus:ring-4 focus:ring-teal-300 shadow-xl shadow-teal-200 hover:shadow-2xl hover:shadow-teal-300 transition-all duration-200 transform hover:-translate-y-0.5`}
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <svg
@@ -138,21 +139,17 @@ export default function Login() {
           <p className="text-sm text-slate-600">
             Don't have an account?{" "}
             <Link
-              href="/signup"
+              href="/doctor/signup"
               className="font-bold text-primary hover:text-teal-600 transition"
             >
-              Create Account
+              Register as Doctor
             </Link>
           </p>
           <div className="mt-6 pt-6 border-t border-slate-100">
             <p className="text-sm text-slate-500">
-              Are you a doctor?{" "}
-              <Link href="/doctor/login" className="font-bold text-primary hover:text-teal-600 transition">
-                Doctor Login
-              </Link>
-              {" | "}
-              <Link href="/doctor/signup" className="font-bold text-primary hover:text-teal-600 transition">
-                Register as Doctor
+              Are you a patient?{" "}
+              <Link href="/login" className="font-bold text-primary hover:text-teal-600 transition">
+                Patient Login
               </Link>
             </p>
           </div>
@@ -161,3 +158,4 @@ export default function Login() {
     </div>
   );
 }
+

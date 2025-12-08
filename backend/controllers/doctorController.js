@@ -2,8 +2,54 @@ import Doctor from "../models/Doctor.js";
 
 export const getDoctors = async (req, res) => {
   try {
-    const doctors = await Doctor.find();
-    res.json(doctors);
+    const { search, specialization, city, sort, page = 1, limit = 6 } = req.query;
+
+    // 1. Build Query
+    const query = {};
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      query.$or = [{ name: searchRegex }, { specialization: searchRegex }];
+    }
+
+    if (specialization) {
+      query.specialization = new RegExp(specialization, "i");
+    }
+
+    if (city) {
+      query.location = new RegExp(city, "i"); // Mapping city to location field
+    }
+
+    // 2. Build Sort Option
+    let sortOption = { createdAt: -1 }; // Default: Newest first
+
+    if (sort === "fee_asc") {
+      sortOption = { fee: 1 };
+    } else if (sort === "fee_desc") {
+      sortOption = { fee: -1 };
+    } else if (sort === "experience_desc") {
+      sortOption = { experience: -1 };
+    }
+    // "rating" sort is ignored for now as field doesn't exist
+
+    // 3. Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // 4. Executing Query
+    const totalDocs = await Doctor.countDocuments(query);
+    const doctors = await Doctor.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNum);
+
+    res.json({
+      doctors,
+      page: pageNum,
+      pages: Math.ceil(totalDocs / limitNum),
+      total: totalDocs,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to fetch doctors" });
   }
@@ -192,7 +238,7 @@ export const updateSlot = async (req, res) => {
     doctor.slots[slotIndex].time = newTime;
 
     await doctor.save();
-    
+
     // Sort slots before returning
     const sortedSlots = doctor.slots.sort((a, b) => {
       const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -223,8 +269,8 @@ export const deleteSlot = async (req, res) => {
     });
 
     if (appointments.length > 0) {
-      return res.status(400).json({ 
-        message: "Cannot delete slot with existing appointments. Please cancel appointments first." 
+      return res.status(400).json({
+        message: "Cannot delete slot with existing appointments. Please cancel appointments first."
       });
     }
 
@@ -233,7 +279,7 @@ export const deleteSlot = async (req, res) => {
     );
 
     await doctor.save();
-    
+
     // Sort slots before returning
     const sortedSlots = doctor.slots.sort((a, b) => {
       const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();

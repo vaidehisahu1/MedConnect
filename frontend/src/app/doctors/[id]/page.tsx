@@ -6,6 +6,13 @@ import Image from "next/image";
 import api from "../../../lib/api";
 import BookingWidget from "../../../components/BookingWidget";
 
+interface Slot {
+  date: string;
+  time: string;
+  available?: boolean;
+  _id?: string;
+}
+
 interface Doctor {
   _id: string;
   name: string;
@@ -15,7 +22,7 @@ interface Doctor {
   experience: number;
   fee: number;
   image?: string;
-  slots?: string[];
+  slots?: Slot[] | string[];
 }
 
 export default function DoctorProfile() {

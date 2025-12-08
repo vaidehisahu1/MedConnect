@@ -49,7 +49,7 @@ export default function DoctorSignup() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data));
 
-            router.push('/doctor/home'); // Redirect to new dashboard
+            router.push('/doctor/home'); // Redirect to doctor dashboard
         } catch (err: any) {
             setError(err.response?.data?.message || 'Signup failed');
         } finally {
@@ -283,8 +283,8 @@ export default function DoctorSignup() {
                 <div className="text-center mt-6">
                     <p className="text-sm text-slate-600">
                         Already have an account?{' '}
-                        <Link href="/login" className="font-bold text-primary hover:text-teal-600 transition">
-                            Login
+                        <Link href="/doctor/login" className="font-bold text-primary hover:text-teal-600 transition">
+                            Doctor Login
                         </Link>
                     </p>
                 </div>

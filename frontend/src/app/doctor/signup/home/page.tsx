@@ -19,7 +19,7 @@ export default function DoctorHome() {
 
     const fetchData = async () => {
       try {
-        const { data } = await api.get("/appointments/myappointments");
+        const { data } = await api.get("/appointments/doctor-appointments");
         setAppointments(data);
       } catch {
         //

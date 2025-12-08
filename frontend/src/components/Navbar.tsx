@@ -6,29 +6,49 @@ import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<{ name?: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; role?: string } | null>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem("user");
-    if (raw) {
-      try {
-        setUser(JSON.parse(raw));
-      } catch {
+    const updateUser = () => {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        try {
+          setUser(JSON.parse(raw));
+        } catch {
+          setUser(null);
+        }
+      } else {
         setUser(null);
       }
-    }
-  }, []);
+    };
+
+    updateUser();
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener("storage", updateUser);
+    // Also check on pathname change (when navigating)
+    return () => window.removeEventListener("storage", updateUser);
+  }, [pathname]);
 
   const logout = () => {
     localStorage.clear();
-    window.location.href = "/login";
+    const userRole = user?.role;
+    if (userRole === "doctor") {
+      window.location.href = "/doctor/login";
+    } else {
+      window.location.href = "/login";
+    }
   };
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Find Doctors", href: "/doctors" },
-    { name: "My Appointments", href: "/appointments" },
-  ];
+  // Show different nav links based on user role
+  const navLinks = user?.role === "doctor" 
+    ? [
+        { name: "Home", href: "/doctor/home" },
+      ]
+    : [
+        { name: "Home", href: "/" },
+        { name: "Find Doctors", href: "/doctors" },
+        { name: "My Appointments", href: "/appointments" },
+      ];
 
   return (
     <nav className="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
@@ -78,6 +98,14 @@ export default function Navbar() {
               <span className="text-sm font-medium text-gray-700">
                 Hi, {user.name}
               </span>
+              {user.role === "doctor" && (
+                <Link
+                  href="/doctor/home"
+                  className="text-sm font-medium text-teal-600 hover:text-teal-700 transition"
+                >
+                  Dashboard
+                </Link>
+              )}
               <button
                 onClick={logout}
                 className="text-sm font-medium text-red-500 hover:text-red-600 transition"
@@ -95,7 +123,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white transition-all bg-primary rounded-lg hover:bg-teal-600 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white transition-all bg-teal-600 rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >
                 Sign Up
               </Link>
