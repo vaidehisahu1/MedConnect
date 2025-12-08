@@ -1,45 +1,8 @@
 import Doctor from "../models/Doctor.js";
 
 export const getDoctors = async (req, res) => {
-  try {
-    const { search, specialization, city, sort, page = 1, limit = 6 } = req.query;
-
-    const query = {};
-
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { specialization: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    if (specialization) {
-      query.specialization = specialization;
-    }
-
-    if (city) {
-      query.location = city;
-    }
-
-    let sortOption = {};
-    if (sort === "fee_asc") sortOption.fee = 1;
-    if (sort === "fee_desc") sortOption.fee = -1;
-    if (sort === "experience_desc") sortOption.experience = -1;
-
-    const count = await Doctor.countDocuments(query);
-    const doctors = await Doctor.find(query)
-      .sort(sortOption)
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    res.json({
-      doctors,
-      pages: Math.ceil(count / limit),
-      currentPage: Number(page),
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const doctors = await Doctor.find();
+  res.json(doctors);
 };
 
 export const getDoctorById = async (req, res) => {
@@ -66,4 +29,36 @@ export const deleteDoctor = async (req, res) => {
 
   await doctor.deleteOne();
   res.json({ message: "Doctor deleted" });
+};
+
+// For Doctor Dashboard
+export const getDoctorProfile = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ user: req.user._id });
+    if (!doctor) return res.status(404).json({ message: "Doctor profile not found" });
+    res.json(doctor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateDoctorProfile = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ user: req.user._id });
+    if (!doctor) return res.status(404).json({ message: "Doctor profile not found" });
+
+    // Allow updating limited fields for now (availability, slots, fees, etc.)
+    const { slots, available, fee, experience, about } = req.body;
+
+    if (slots) doctor.slots = slots;
+    if (available !== undefined) doctor.available = available;
+    if (fee) doctor.fee = fee;
+    if (experience) doctor.experience = experience;
+    if (about) doctor.about = about;
+
+    await doctor.save();
+    res.json(doctor);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

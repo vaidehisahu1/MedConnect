@@ -4,7 +4,9 @@ import {
   getDoctorById,
   createDoctor,
   updateDoctor,
-  deleteDoctor
+  deleteDoctor,
+  getDoctorProfile,
+  updateDoctorProfile
 } from "../controllers/doctorController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -13,6 +15,10 @@ const router = express.Router();
 router.route("/")
   .get(getDoctors)
   .post(createDoctor);
+
+router.route("/profile")
+  .get(protect, getDoctorProfile)
+  .put(protect, updateDoctorProfile);
 
 router.route("/:id")
   .get(getDoctorById)

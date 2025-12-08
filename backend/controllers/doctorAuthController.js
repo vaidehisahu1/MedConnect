@@ -3,7 +3,11 @@ import Doctor from "../models/Doctor.js";
 import generateToken from "../utils/generateToken.js";
 
 export const registerDoctor = async (req, res) => {
-  const { name, email, password, specialization, experience, fee, location, about } = req.body;
+  const {
+    name, email, password, specialization, experience, fee, location, about,
+    registrationNumber, registrationCouncil, registrationYear,
+    degree, college, completionYear, experienceYear
+  } = req.body;
 
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ message: "Doctor already exists" });
@@ -23,6 +27,13 @@ export const registerDoctor = async (req, res) => {
     fee,
     location,
     about,
+    registrationNumber,
+    registrationCouncil,
+    registrationYear,
+    degree,
+    college,
+    completionYear,
+    experienceYear,
     slots: [],
   });
 

@@ -12,6 +12,15 @@ const doctorSchema = new mongoose.Schema(
       default: "https://via.placeholder.com/150"
     },
     about: { type: String, required: true },
+
+    // New Fields for Enhanced Registration
+    registrationNumber: { type: String },
+    registrationCouncil: { type: String },
+    registrationYear: { type: String },
+    degree: { type: String },
+    college: { type: String },
+    completionYear: { type: String },
+    experienceYear: { type: String }, // Start year of practice
     available: { type: Boolean, default: true },
     slots: {
       type: [String],
