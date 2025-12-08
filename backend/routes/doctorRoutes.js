@@ -12,11 +12,11 @@ const router = express.Router();
 
 router.route("/")
   .get(getDoctors)
-  .post(protect, admin, createDoctor);
+  .post(createDoctor);
 
 router.route("/:id")
   .get(getDoctorById)
   .put(protect, admin, updateDoctor)
-  .delete(protect, admin, deleteDoctor);
+  .delete(deleteDoctor);
 
 export default router;

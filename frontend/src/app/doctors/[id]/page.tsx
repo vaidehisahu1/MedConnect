@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "../../../lib/api";
 import Image from "next/image";
@@ -18,39 +18,33 @@ interface Doctor {
 }
 
 export default function DoctorProfile() {
-  const params = useParams();
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const id = params?.id as string;
 
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
+
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [bookingStatus, setBookingStatus] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // NEW
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    async function fetchDoctor() {
+    async function load() {
       try {
         const { data } = await api.get(`/doctors/${id}`);
         setDoctor(data);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error("Error fetching doctor details:", error.message);
-        }
-        setErrorMessage("Failed to fetch doctor details. Please try again later.");
+      } catch (err) {
+        console.error("Cannot load doctor", err);
       } finally {
         setLoading(false);
       }
     }
-
-    if (id) fetchDoctor();
+    load();
   }, [id]);
 
-  const handleBooking = async (e: React.FormEvent<HTMLFormElement>) => {
+  async function book(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setBookingStatus("loading");
-    setErrorMessage("");
+    setStatus("loading");
 
     try {
       await api.post("/appointments", {
@@ -59,106 +53,82 @@ export default function DoctorProfile() {
         time,
       });
 
-      setBookingStatus("success");
-      setTimeout(() => router.push("/dashboard"), 2000);
-    } catch (error: unknown) {
-      console.error("Booking failed:", error);
-      // we cannot safely access error.response without Axios types
-      setBookingStatus("error");
+      setStatus("success");
+      setTimeout(() => router.push("/dashboard"), 1200);
+    } catch {
+      setStatus("error");
     }
-  };
+  }
 
-  if (loading) return <div className="text-center py-12">Loading profile...</div>;
-  if (errorMessage) return <div className="text-center py-12 text-red-500">{errorMessage}</div>;
-  if (!doctor) return <div className="text-center py-12">Doctor not found</div>;
+  if (loading) return <div className="py-16 text-center">Loading profile...</div>;
+  if (!doctor) return <div className="py-16 text-center">Doctor not found</div>;
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 flex flex-col md:flex-row">
+      <div className="bg-white shadow border rounded-xl overflow-hidden flex flex-col md:flex-row">
         <div className="md:w-1/3">
           <Image
-            src={doctor.image || "/default-doctor.jpg"}
+            src={doctor.image || "/default-image.jpg"}
             alt={doctor.name}
-            width={500}
-            height={500}
+            width={600}
+            height={600}
             className="w-full h-full object-cover"
           />
         </div>
 
         <div className="p-8 md:w-2/3">
-          <h1 className="text-3xl font-bold text-primary mb-2">{doctor.name}</h1>
-          <p className="text-xl text-secondary font-medium mb-4">
+          <h1 className="text-3xl font-bold mb-2 text-primary">{doctor.name}</h1>
+          <p className="text-secondary font-medium text-lg mb-4">
             {doctor.specialization}
           </p>
 
-          <div className="space-y-2 text-gray-700 mb-6">
-            <p>
-              <span className="font-semibold">Experience:</span> {doctor.experience} years
-            </p>
-            <p>
-              <span className="font-semibold">Location:</span> {doctor.location}
-            </p>
-            <p>
-              <span className="font-semibold">Consultation Fee:</span> ${doctor.fee}
-            </p>
-            <p>
-              <span className="font-semibold">About:</span> {doctor.about}
-            </p>
-          </div>
+          <p><strong>Experience:</strong> {doctor.experience} years</p>
+          <p><strong>Location:</strong> {doctor.location}</p>
+          <p><strong>Fee:</strong> ₹{doctor.fee}</p>
+          <p className="mt-4"><strong>About:</strong> {doctor.about}</p>
 
           <hr className="my-6" />
 
-          <h3 className="text-xl font-bold text-primary mb-4">Book Appointment</h3>
-          {bookingStatus === "success" ? (
-            <div className="bg-green-100 text-green-700 p-4 rounded-lg">
-              Appointment booked successfully! Redirecting to dashboard...
+          <h2 className="text-xl font-bold mb-4 text-primary">Book Appointment</h2>
+
+          {status === "success" ? (
+            <div className="p-4 text-green-700 bg-green-100 rounded">
+              Appointment confirmed. Redirecting...
             </div>
           ) : (
-            <form onSubmit={handleBooking} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">Date</label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
-                    required
-                  />
-                </div>
+            <form className="space-y-4" onSubmit={book}>
+              <input
+                type="date"
+                className="w-full border rounded p-2"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
 
-                <div>
-                  <label className="block text-gray-700 mb-2">Time</label>
-                  <select
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
-                    required
-                  >
-                    <option value="">Select Time</option>
-                    <option value="09:00 AM">09:00 AM</option>
-                    <option value="10:00 AM">10:00 AM</option>
-                    <option value="11:00 AM">11:00 AM</option>
-                    <option value="02:00 PM">02:00 PM</option>
-                    <option value="03:00 PM">03:00 PM</option>
-                    <option value="04:00 PM">04:00 PM</option>
-                  </select>
-                </div>
-              </div>
+              <select
+                className="w-full border rounded p-2"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                required
+              >
+                <option value="">Select time...</option>
 
-              {bookingStatus === "error" && (
-                <p className="text-red-500 text-sm">
-                  Failed to book appointment. Please try again.
-                </p>
-              )}
+                {(doctor.slots || []).map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
 
               <button
                 type="submit"
-                disabled={bookingStatus === "loading"}
-                className="w-full bg-secondary text-primary font-bold py-3 rounded-lg hover:bg-opacity-90 transition disabled:opacity-50"
+                className="w-full bg-secondary text-white font-bold py-2 rounded"
+                disabled={status === "loading"}
               >
-                {bookingStatus === "loading" ? "Booking..." : "Confirm Booking"}
+                {status === "loading" ? "Booking..." : "Confirm"}
               </button>
+
+              {status === "error" && (
+                <p className="text-red-600 text-sm">Booking failed.</p>
+              )}
             </form>
           )}
         </div>
