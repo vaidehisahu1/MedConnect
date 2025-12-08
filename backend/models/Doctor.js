@@ -23,7 +23,11 @@ const doctorSchema = new mongoose.Schema(
     experienceYear: { type: String }, // Start year of practice
     available: { type: Boolean, default: true },
     slots: {
-      type: [String],
+      type: [{
+        date: { type: String, required: true },
+        time: { type: String, required: true },
+        available: { type: Boolean, default: true }
+      }],
       default: []
     },
     user: {

@@ -9,6 +9,7 @@ export const addAppointment = async (req, res) => {
       doctor,
       date,
       time,
+      status: "pending", // Set as pending so doctor can accept/reject
     });
 
     const createdAppointment = await appointment.save();
@@ -44,7 +45,9 @@ export const getDoctorAppointments = async (req, res) => {
 
     const appointments = await Appointment.find({
       doctor: doctorProfile._id,
-    }).populate("user", "name email");
+    })
+      .populate("user", "name email")
+      .sort({ createdAt: -1 }); // Sort by newest first
 
     res.json(appointments);
   } catch (error) {
@@ -90,5 +93,65 @@ export const deleteAppointment = async (req, res) => {
     res.json({ message: "Appointment removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// For Doctors - Accept appointment
+export const acceptAppointment = async (req, res) => {
+  try {
+    const Doctor = (await import("../models/Doctor.js")).default;
+    const doctorProfile = await Doctor.findOne({ user: req.user._id });
+
+    if (!doctorProfile) {
+      return res.status(404).json({ message: "Doctor profile not found" });
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    // Verify doctor owns this appointment
+    if (appointment.doctor.toString() !== doctorProfile._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    appointment.status = "confirmed";
+    await appointment.save();
+
+    res.json({ message: "Appointment accepted", appointment });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to accept appointment" });
+  }
+};
+
+// For Doctors - Reject/Cancel appointment
+export const rejectAppointment = async (req, res) => {
+  try {
+    const Doctor = (await import("../models/Doctor.js")).default;
+    const doctorProfile = await Doctor.findOne({ user: req.user._id });
+
+    if (!doctorProfile) {
+      return res.status(404).json({ message: "Doctor profile not found" });
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    // Verify doctor owns this appointment
+    if (appointment.doctor.toString() !== doctorProfile._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    appointment.status = "cancelled";
+    await appointment.save();
+
+    res.json({ message: "Appointment rejected", appointment });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Failed to reject appointment" });
   }
 };
