@@ -1,21 +1,27 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-/* Tailwind CSS configuration should be done in the tailwind.config.js file */
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --primary: 172 66% 50%; /* #2dd4bf Teal */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --radius: 0.75rem;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: #f8fafc; /* Slate-50 */
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
