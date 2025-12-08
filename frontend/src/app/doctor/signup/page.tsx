@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '../../../lib/api';
+import { CITIES } from '../../../lib/constants';
 
 export default function DoctorSignup() {
     const [formData, setFormData] = useState({
@@ -147,11 +148,11 @@ export default function DoctorSignup() {
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition bg-white"
                                 >
                                     <option value="">Select City</option>
-                                    <option value="New York">New York</option>
-                                    <option value="London">London</option>
-                                    <option value="Mumbai">Mumbai</option>
-                                    <option value="Delhi">Delhi</option>
-                                    <option value="Bangalore">Bangalore</option>
+                                    {CITIES.map((city) => (
+                                        <option key={city} value={city}>
+                                            {city}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div>

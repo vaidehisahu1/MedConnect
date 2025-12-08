@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../../../lib/api";
+import { TIME_SLOTS } from "../../../lib/constants";
 
 interface Slot {
   date: string;
@@ -116,7 +117,7 @@ export default function DoctorSlots() {
     return acc;
   }, {} as Record<string, Slot[]>);
 
-  const sortedDates = Object.keys(slotsByDate).sort((a, b) => 
+  const sortedDates = Object.keys(slotsByDate).sort((a, b) =>
     new Date(a).getTime() - new Date(b).getTime()
   );
 
@@ -168,13 +169,19 @@ export default function DoctorSlots() {
             </div>
             <div>
               <label className="block text-sm font-bold mb-2 text-slate-700">Time</label>
-              <input
-                type="time"
+              <select
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                 required
                 className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none shadow-sm hover:border-slate-400 transition-colors"
-              />
+              >
+                <option value="">Select Time</option>
+                {TIME_SLOTS.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {slot}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex items-end">
               <button
@@ -232,13 +239,19 @@ export default function DoctorSlots() {
                         </div>
                         <div>
                           <label className="block text-xs font-bold mb-1 text-slate-700">Time</label>
-                          <input
-                            type="time"
+                          <select
                             value={editFormData.time}
                             onChange={(e) => setEditFormData({ ...editFormData, time: e.target.value })}
                             required
                             className="w-full px-3 py-2 rounded-lg border-2 border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none text-sm"
-                          />
+                          >
+                            <option value="">Select Time</option>
+                            {TIME_SLOTS.map((slot) => (
+                              <option key={slot} value={slot}>
+                                {slot}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div className="flex gap-2">
                           <button

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "../lib/api";
+import { TIME_SLOTS } from "../lib/constants";
 
 interface Slot {
     date: string;
@@ -135,10 +136,10 @@ export default function BookingWidget({
                                     onClick={() => handleDateClick(day)}
                                     disabled={isPast}
                                     className={`w-8 h-8 rounded-full text-sm font-medium flex items-center justify-center mx-auto transition ${isSelected
-                                            ? "bg-primary text-white shadow-md shadow-teal-200"
-                                            : isPast
-                                                ? "text-slate-300 cursor-not-allowed"
-                                                : "text-slate-700 hover:bg-teal-50 hover:text-primary"
+                                        ? "bg-primary text-white shadow-md shadow-teal-200"
+                                        : isPast
+                                            ? "text-slate-300 cursor-not-allowed"
+                                            : "text-slate-700 hover:bg-teal-50 hover:text-primary"
                                         }`}
                                 >
                                     {day}
@@ -156,48 +157,45 @@ export default function BookingWidget({
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                     {(() => {
-                        // Handle both old format (string[]) and new format (Slot[])
-                        let availableSlots: string[] = [];
-                        
-                        if (slots.length > 0) {
-                            if (typeof slots[0] === 'string') {
-                                // Old format: string array
-                                availableSlots = slots as string[];
-                            } else {
-                                // New format: Slot objects - filter by selected date
-                                const slotObjects = slots as Slot[];
-                                if (selectedDate) {
-                                    const formattedDate = selectedDate.toISOString().split("T")[0];
-                                    availableSlots = slotObjects
-                                        .filter(slot => slot.date === formattedDate && slot.available !== false)
-                                        .map(slot => slot.time)
-                                        .sort(); // Sort times
+                        // Use standardized time slots
+                        return TIME_SLOTS.map((time) => {
+                            // Check if this time is explicitly available in doctor's slots
+                            let isInstantBook = false;
+
+                            if (slots.length > 0) {
+                                if (typeof slots[0] === 'string') {
+                                    isInstantBook = (slots as string[]).includes(time);
                                 } else {
-                                    // If no date selected, show all unique times
-                                    const uniqueTimes = [...new Set(slotObjects.map(s => s.time))];
-                                    availableSlots = uniqueTimes.sort();
+                                    const slotObjects = slots as Slot[];
+                                    if (selectedDate) {
+                                        const formattedDate = selectedDate.toISOString().split("T")[0];
+                                        isInstantBook = slotObjects.some(
+                                            s => s.date === formattedDate && s.time === time && s.available !== false
+                                        );
+                                    }
                                 }
                             }
-                        }
 
-                        return availableSlots.length > 0 ? (
-                            availableSlots.map((time) => (
+                            return (
                                 <button
                                     key={time}
                                     onClick={() => setSelectedTime(time)}
-                                    className={`py-2 px-1 text-xs sm:text-sm border rounded-xl font-medium transition ${selectedTime === time
-                                            ? "bg-teal-600 text-white border-teal-600 shadow-sm"
-                                            : "bg-white text-slate-600 border-slate-200 hover:border-teal-500 hover:text-teal-600"
+                                    className={`py-2 px-1 text-xs sm:text-sm border-2 rounded-xl font-bold transition flex flex-col items-center justify-center gap-1 ${selectedTime === time
+                                        ? "bg-slate-900 text-white border-slate-900 shadow-lg scale-105"
+                                        : isInstantBook
+                                            ? "bg-teal-50 text-teal-700 border-teal-200 hover:border-teal-500 hover:shadow-md"
+                                            : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-700"
                                         }`}
                                 >
-                                    {time}
+                                    <span>{time}</span>
+                                    {isInstantBook ? (
+                                        <span className="text-[10px] uppercase tracking-wider text-teal-600 font-extrabold">Instant</span>
+                                    ) : (
+                                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium">Request</span>
+                                    )}
                                 </button>
-                            ))
-                        ) : (
-                            <div className="col-span-3 text-sm text-slate-400 italic text-center py-2">
-                                {selectedDate ? "No slots available for this date." : "Please select a date first."}
-                            </div>
-                        );
+                            );
+                        });
                     })()}
                 </div>
             </div>
@@ -212,8 +210,8 @@ export default function BookingWidget({
                     onClick={handleBook}
                     disabled={!selectedDate || !selectedTime || status === "loading"}
                     className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition ${!selectedDate || !selectedTime || status === "loading"
-                            ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                            : "bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-1 shadow-slate-200"
+                        ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                        : "bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-1 shadow-slate-200"
                         }`}
                 >
                     {status === "loading" ? (

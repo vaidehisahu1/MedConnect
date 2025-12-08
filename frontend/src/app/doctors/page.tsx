@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import api from "../../lib/api";
+import { CITIES } from "../../lib/constants";
 import DoctorCard from "../../components/DoctorCard";
 
 interface Doctor {
@@ -178,14 +179,11 @@ export default function Doctors() {
                 className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl appearance-none focus:ring-2 focus:ring-primary/20 cursor-pointer text-slate-700"
               >
                 <option value="">All Cities</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Bengaluru">Bengaluru</option>
-                <option value="Chennai">Chennai</option>
-                <option value="Kolkata">Kolkata</option>
-                <option value="Hyderabad">Hyderabad</option>
-                <option value="Pune">Pune</option>
-                <option value="Ahmedabad">Ahmedabad</option>
+                {CITIES.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
               </select>
               <svg
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
