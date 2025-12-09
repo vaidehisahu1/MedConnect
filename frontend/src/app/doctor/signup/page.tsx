@@ -50,7 +50,7 @@ export default function DoctorSignup() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data));
 
-            router.push('/doctor/home'); // Redirect to doctor dashboard
+            router.push('/doctor/login'); // Redirect to doctor login after registration
         } catch (err: any) {
             setError(err.response?.data?.message || 'Signup failed');
         } finally {

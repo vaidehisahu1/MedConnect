@@ -20,15 +20,17 @@ export default function Login() {
     try {
       const { data } = await api.post("/users/login", { email, password });
 
-      // Check if user is a doctor - redirect to doctor login
+      // Handle doctor role separately
       if (data.role === "doctor") {
         setError("Please use the doctor login page");
         setLoading(false);
         return;
       }
 
+      // Store token and user info for patients
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
+
       router.push("/");
     } catch (err: any) {
       setError(
