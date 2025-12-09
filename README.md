@@ -7,10 +7,10 @@
 ## 🔗 Live Demo Links  
 
 ### 🖥️ Frontend (Next.js)  
-https://medconnect-tsae.onrender.com/
+https://med-connect-d9mb.vercel.app/
 
 ### 🛠 Backend API (Node + Express)
-https://med-connect-d9mb.vercel.app/
+https://medconnect-tsae.onrender.com/
 
 ---
 
