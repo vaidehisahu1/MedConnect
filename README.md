@@ -82,7 +82,7 @@ Finding the right doctor for consultation is still difficult due to lack of avai
 
 ### Clone repository
 ```bash
-git clone https://github.com/<your-username>/medconnect.git
-cd medconnect
+git clone https://github.com/vaidehisahu1/medConnect.git
+cd medConnect
 
 
