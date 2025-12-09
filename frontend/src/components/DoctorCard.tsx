@@ -16,11 +16,12 @@ interface DoctorProps {
 }
 
 export default function DoctorCard({ doctor }: { doctor: DoctorProps }) {
-  // Generate random rating 4.5 - 5.0 for demo
-  const rating = (4.5 + Math.random() * 0.5).toFixed(1);
-  const reviewCount = Math.floor(Math.random() * 50) + 10;
-  // available tag logic (randomly today or tomorrow)
-  const isToday = Math.random() > 0.5;
+  // Use static values based on doctor ID to prevent hydration mismatch
+  // In a real app, these would come from the backend
+  const idNum = parseInt(doctor._id.slice(-4), 16);
+  const rating = (4.5 + (idNum % 5) * 0.1).toFixed(1);
+  const reviewCount = (idNum % 40) + 10;
+  const isToday = idNum % 2 === 0;
 
   return (
     <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-xl hover:border-teal-100 transition-all duration-300 flex flex-col md:flex-row gap-6 group">
