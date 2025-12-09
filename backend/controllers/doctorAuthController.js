@@ -20,32 +20,38 @@ export const registerDoctor = async (req, res) => {
       role: "doctor"
     });
 
-    const doctor = await Doctor.create({
-      user: user._id,
-      name,
-      specialization,
-      experience,
-      fee,
-      location,
-      about,
-      registrationNumber,
-      registrationCouncil,
-      registrationYear,
-      degree,
-      college,
-      completionYear,
-      experienceYear,
-      slots: [],
-    });
+    try {
+      const doctor = await Doctor.create({
+        user: user._id,
+        name,
+        specialization,
+        experience,
+        fee,
+        location,
+        about,
+        registrationNumber,
+        registrationCouncil,
+        registrationYear,
+        degree,
+        college,
+        completionYear,
+        experienceYear,
+        slots: [],
+      });
 
-    res.status(201).json({
-      _id: user._id,
-      name,
-      email,
-      role: user.role,
-      doctorId: doctor._id,
-      token: generateToken(user._id),
-    });
+      res.status(201).json({
+        _id: user._id,
+        name,
+        email,
+        role: user.role,
+        doctorId: doctor._id,
+        token: generateToken(user._id),
+      });
+    } catch (docError) {
+      // Rollback: Delete the user if doctor creation fails
+      await User.findByIdAndDelete(user._id);
+      throw new Error("Failed to create doctor profile: " + docError.message);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message || "Failed to register doctor" });
   }
@@ -56,7 +62,7 @@ export const authDoctor = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    
+
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
